@@ -1,0 +1,979 @@
+{
+  "buttermilk": [
+    {
+      "substitute": "Milk + Lemon Juice",
+      "ratio": "1 cup milk + 1 tbsp lemon juice per cup of buttermilk",
+      "note": "Slight tang, works great in baking; rest 5 minutes to curdle"
+    },
+    {
+      "substitute": "Milk + White Vinegar",
+      "ratio": "1 cup milk + 1 tbsp white vinegar",
+      "note": "Nearly identical result to lemon juice version"
+    },
+    {
+      "substitute": "Plain Yogurt",
+      "ratio": "Equal amount — thin with a splash of milk if needed",
+      "note": "Thicker consistency, rich flavor and tender crumb"
+    },
+    {
+      "substitute": "Sour Cream + Water",
+      "ratio": "¾ cup sour cream + ¼ cup water per cup",
+      "note": "Extra-moist texture ideal for quick breads and muffins"
+    }
+  ],
+  "butter": [
+    {
+      "substitute": "Coconut Oil",
+      "ratio": "1:1 equal amount (solid for creaming, melted for batters)",
+      "note": "Dairy-free; refined coconut oil has neutral flavor"
+    },
+    {
+      "substitute": "Olive Oil",
+      "ratio": "¾ cup olive oil per 1 cup butter",
+      "note": "Moist crumb, ideal for savory cooking and olive oil cakes"
+    },
+    {
+      "substitute": "Greek Yogurt",
+      "ratio": "½ cup Greek yogurt + ½ cup butter per 1 cup",
+      "note": "Lighter fat content while keeping baked goods tender"
+    },
+    {
+      "substitute": "Unsweetened Applesauce",
+      "ratio": "½ to 1 cup per 1 cup butter in quick breads",
+      "note": "Soft, cakey texture; not crisp for cookies"
+    }
+  ],
+  "unsalted butter": [
+    {
+      "substitute": "Salted Butter",
+      "ratio": "1:1 equal amount — reduce recipe salt by ¼ tsp per ½ cup",
+      "note": "Identical richness and browning behavior"
+    },
+    {
+      "substitute": "Refined Coconut Oil",
+      "ratio": "1:1 equal amount",
+      "note": "Clean dairy-free swap for baking and sautéing"
+    },
+    {
+      "substitute": "Ghee",
+      "ratio": "¾ tbsp ghee per 1 tbsp butter for cooking",
+      "note": "Nutty aroma and higher smoke point"
+    }
+  ],
+  "salted butter": [
+    {
+      "substitute": "Unsalted Butter + Pinch of Salt",
+      "ratio": "1 cup unsalted butter + ½ tsp fine salt",
+      "note": "Exact match for flavor and moisture"
+    },
+    {
+      "substitute": "Olive Oil + Pinch of Salt",
+      "ratio": "¾ cup olive oil + ¼ tsp salt per 1 cup",
+      "note": "Works well in sautés, roasting, and muffins"
+    },
+    {
+      "substitute": "Plant-Based Butter Sticks",
+      "ratio": "1:1 equal amount",
+      "note": "Closest dairy-free match for spreading and baking"
+    }
+  ],
+  "heavy cream": [
+    {
+      "substitute": "Whole Milk + Melted Butter",
+      "ratio": "¾ cup milk + ¼ cup melted butter per 1 cup cream",
+      "note": "Matches fat percentage for soups, sauces, and baking (won't whip)"
+    },
+    {
+      "substitute": "Full-Fat Coconut Cream",
+      "ratio": "1:1 equal amount (chilled can solids)",
+      "note": "Whips well and enriches curries and ganaches"
+    },
+    {
+      "substitute": "Half-and-Half + Butter",
+      "ratio": "⅞ cup half-and-half + 2 tbsp melted butter",
+      "note": "Velvety sauce texture with minimal flavor change"
+    }
+  ],
+  "sour cream": [
+    {
+      "substitute": "Full-Fat Greek Yogurt",
+      "ratio": "1:1 equal amount",
+      "note": "Virtually indistinguishable tang and thick body"
+    },
+    {
+      "substitute": "Crème Fraîche",
+      "ratio": "1:1 equal amount",
+      "note": "Richer, slightly less tart, won't curdle when simmered"
+    },
+    {
+      "substitute": "Cottage Cheese + Lemon Juice",
+      "ratio": "1 cup blended cottage cheese + 1 tsp lemon juice",
+      "note": "High-protein smooth swap once pureed"
+    }
+  ],
+  "cream cheese": [
+    {
+      "substitute": "Mascarpone",
+      "ratio": "1:1 equal amount",
+      "note": "Sweeter, silkier texture — add a squeeze of lemon for tang"
+    },
+    {
+      "substitute": "Strained Labneh / Greek Yogurt",
+      "ratio": "1:1 equal amount (strained overnight)",
+      "note": "Lighter with bright cultured tang"
+    },
+    {
+      "substitute": "Blended Ricotta + Butter",
+      "ratio": "¾ cup drained ricotta + ¼ cup softened butter",
+      "note": "Creamy spreadable consistency for fillings"
+    }
+  ],
+  "whole milk": [
+    {
+      "substitute": "Oat Milk (Barista / Full-Fat)",
+      "ratio": "1:1 equal amount",
+      "note": "Neutral sweetness and creamy mouthfeel in baking"
+    },
+    {
+      "substitute": "Half-and-Half + Water",
+      "ratio": "½ cup half-and-half + ½ cup water",
+      "note": "Matches dairy fat and protein closely"
+    },
+    {
+      "substitute": "Evaporated Milk + Water",
+      "ratio": "½ cup evaporated milk + ½ cup water",
+      "note": "Shelf-stable pantry swap with mild caramelized note"
+    }
+  ],
+  "half-and-half": [
+    {
+      "substitute": "Whole Milk + Heavy Cream",
+      "ratio": "½ cup whole milk + ½ cup heavy cream",
+      "note": "Literal 1:1 definition of half-and-half"
+    },
+    {
+      "substitute": "Whole Milk + Melted Butter",
+      "ratio": "⅞ cup milk + 1½ tbsp melted butter",
+      "note": "Adds richness in soups, quiches, and batters"
+    },
+    {
+      "substitute": "Evaporated Milk",
+      "ratio": "1:1 equal amount",
+      "note": "Creamy body without extra prep"
+    }
+  ],
+  "greek yogurt": [
+    {
+      "substitute": "Sour Cream",
+      "ratio": "1:1 equal amount",
+      "note": "Same thick tang for marinades, dips, and cakes"
+    },
+    {
+      "substitute": "Skyr",
+      "ratio": "1:1 equal amount",
+      "note": "Thick Icelandic cultured dairy, nearly identical"
+    },
+    {
+      "substitute": "Buttermilk (Reduced Liquid)",
+      "ratio": "1:1 in batters — reduce other liquids slightly",
+      "note": "Keeps acidity for baking soda activation"
+    }
+  ],
+  "egg": [
+    {
+      "substitute": "Flax Egg",
+      "ratio": "1 tbsp ground flaxseed + 3 tbsp water per egg (rest 5 min)",
+      "note": "Hearty binding for cookies, muffins, and pancakes"
+    },
+    {
+      "substitute": "Unsweetened Applesauce",
+      "ratio": "¼ cup per egg",
+      "note": "Adds moisture in cakes and brownies"
+    },
+    {
+      "substitute": "Aquafaba (Chickpea Brine)",
+      "ratio": "3 tbsp whipped lightly per whole egg",
+      "note": "Neutral flavor and great lift in light batters"
+    },
+    {
+      "substitute": "Mashed Ripe Banana",
+      "ratio": "¼ cup mashed banana per egg",
+      "note": "Adds mild banana sweetness and dense moisture"
+    }
+  ],
+  "eggs": [
+    {
+      "substitute": "Flax Eggs",
+      "ratio": "1 tbsp ground flaxseed + 3 tbsp warm water per egg",
+      "note": "Reliable plant-based binder for baking up to 3 eggs"
+    },
+    {
+      "substitute": "Aquafaba",
+      "ratio": "3 tbsp chickpea liquid per large egg",
+      "note": "Light lift without fruit flavor"
+    },
+    {
+      "substitute": "Silken Tofu (Blended)",
+      "ratio": "¼ cup pureed silken tofu per egg",
+      "note": "Rich, custardy texture ideal for brownies and quiches"
+    }
+  ],
+  "egg whites": [
+    {
+      "substitute": "Aquafaba",
+      "ratio": "2 tbsp chickpea liquid per 1 egg white",
+      "note": "Whips to stiff peaks for meringues and mousses"
+    },
+    {
+      "substitute": "Pasteurized Carton Egg Whites",
+      "ratio": "2 tbsp liquid whites per 1 large egg white",
+      "note": "Direct culinary match"
+    },
+    {
+      "substitute": "Meringue Powder + Water",
+      "ratio": "2 tsp meringue powder + 2 tbsp water per white",
+      "note": "Ideal for royal icing and stable foams"
+    }
+  ],
+  "egg yolks": [
+    {
+      "substitute": "Heavy Cream",
+      "ratio": "2 tbsp heavy cream per yolk (in enriches/glazes)",
+      "note": "Provides fat richness for doughs and washes"
+    },
+    {
+      "substitute": "Silken Tofu + Pinch Turmeric",
+      "ratio": "1½ tbsp blended tofu per yolk",
+      "note": "Emulsifies custards and sauces cleanly"
+    },
+    {
+      "substitute": "Whole Egg",
+      "ratio": "1 whole egg per 2 yolks (reduce liquid by 1 tbsp)",
+      "note": "Works well in cookies and enriched breads"
+    }
+  ],
+  "all-purpose flour": [
+    {
+      "substitute": "1:1 Gluten-Free Measure-for-Measure Flour",
+      "ratio": "1:1 equal weight (120g per cup)",
+      "note": "Closest gluten-free structure when blend includes xanthan gum"
+    },
+    {
+      "substitute": "Bread Flour",
+      "ratio": "1:1 equal weight — don't overmix",
+      "note": "Slightly chewier texture from higher protein"
+    },
+    {
+      "substitute": "Whole Wheat Pastry Flour",
+      "ratio": "1:1 or 50/50 split",
+      "note": "Subtle nutty warmth with soft crumb"
+    },
+    {
+      "substitute": "Oat Flour",
+      "ratio": "1⅓ cups (120g) oat flour per 1 cup all-purpose flour",
+      "note": "Tender, wholesome crumb in muffins and pancakes"
+    }
+  ],
+  "cake flour": [
+    {
+      "substitute": "All-Purpose Flour + Cornstarch",
+      "ratio": "1 cup minus 2 tbsp AP flour + 2 tbsp cornstarch (sifted)",
+      "note": "Classic pastry chef trick for ultra-tender crumb"
+    },
+    {
+      "substitute": "Pastry Flour",
+      "ratio": "1:1 equal weight",
+      "note": "Low-protein flour with soft bite"
+    },
+    {
+      "substitute": "All-Purpose Flour (Reduced)",
+      "ratio": "⅞ cup AP flour per 1 cup cake flour",
+      "note": "Prevents excess gluten toughness"
+    }
+  ],
+  "bread flour": [
+    {
+      "substitute": "All-Purpose Flour + Vital Wheat Gluten",
+      "ratio": "1 cup AP flour + 1½ tsp vital wheat gluten",
+      "note": "Rebuilds high gluten elasticity for artisan loaves"
+    },
+    {
+      "substitute": "All-Purpose Flour",
+      "ratio": "1:1 equal weight",
+      "note": "Slightly softer chew; knead an extra minute"
+    },
+    {
+      "substitute": "00 Pizza Flour",
+      "ratio": "1:1 equal weight",
+      "note": "Silky, extensible dough with crisp crust"
+    }
+  ],
+  "self-rising flour": [
+    {
+      "substitute": "All-Purpose Flour + Baking Powder + Salt",
+      "ratio": "1 cup AP flour + 1½ tsp baking powder + ¼ tsp fine salt",
+      "note": "Exact chemical leavening match for biscuits and scones"
+    },
+    {
+      "substitute": "Gluten-Free 1:1 Flour + Baking Powder + Salt",
+      "ratio": "1 cup GF blend + 1½ tsp baking powder + ¼ tsp salt",
+      "note": "Easy gluten-free self-rising equivalent"
+    },
+    {
+      "substitute": "Pastry Flour + Baking Powder + Salt",
+      "ratio": "1 cup pastry flour + 1½ tsp baking powder + ¼ tsp salt",
+      "note": "Extra-flaky Southern-style biscuits"
+    }
+  ],
+  "cornstarch": [
+    {
+      "substitute": "Arrowroot Powder",
+      "ratio": "1:1 equal amount",
+      "note": "Glossy clear sauces; freezes better than cornstarch"
+    },
+    {
+      "substitute": "Potato Starch",
+      "ratio": "1:1 equal amount (stir in near end of cooking)",
+      "note": "Crisp fry coatings and silky pan sauces"
+    },
+    {
+      "substitute": "All-Purpose Flour",
+      "ratio": "2 tbsp flour per 1 tbsp cornstarch",
+      "note": "Opaque matte finish; cook 2 minutes to remove raw flour taste"
+    }
+  ],
+  "baking powder": [
+    {
+      "substitute": "Baking Soda + Cream of Tartar",
+      "ratio": "¼ tsp baking soda + ½ tsp cream of tartar per 1 tsp",
+      "note": "Immediate single-acting lift — bake batter promptly"
+    },
+    {
+      "substitute": "Baking Soda + Lemon Juice",
+      "ratio": "¼ tsp baking soda + ½ tsp lemon juice per 1 tsp",
+      "note": "Activates cleanly in cakes and pancakes"
+    },
+    {
+      "substitute": "Self-Rising Flour",
+      "ratio": "Swap flour to self-rising and omit salt + baking powder",
+      "note": "Convenient built-in leavening"
+    }
+  ],
+  "baking soda": [
+    {
+      "substitute": "Baking Powder",
+      "ratio": "3 tsp baking powder per 1 tsp baking soda",
+      "note": "Works well, though slightly less browning and spread"
+    },
+    {
+      "substitute": "Potassium Bicarbonate",
+      "ratio": "1:1 equal amount",
+      "note": "Sodium-free leavening with identical rise"
+    },
+    {
+      "substitute": "Whipped Egg Whites",
+      "ratio": "Fold stiff whites for mechanical lift in batters",
+      "note": "Airy rise for pancakes and waffles"
+    }
+  ],
+  "active dry yeast": [
+    {
+      "substitute": "Instant / Rapid-Rise Yeast",
+      "ratio": "¾ tsp instant yeast per 1 tsp active dry yeast",
+      "note": "Mix directly into dry ingredients — no blooming required"
+    },
+    {
+      "substitute": "Fresh Cake Yeast",
+      "ratio": "3g fresh yeast per 1g active dry yeast",
+      "note": "Crumble into lukewarm liquid first"
+    },
+    {
+      "substitute": "Active Sourdough Starter",
+      "ratio": "½ cup active starter per 1 packet yeast (reduce flour & water)",
+      "note": "Longer fermentation with complex tangy flavor"
+    }
+  ],
+  "granulated sugar": [
+    {
+      "substitute": "Light Brown Sugar",
+      "ratio": "1:1 by weight (200g)",
+      "note": "Chewier texture and warm caramel note"
+    },
+    {
+      "substitute": "Coconut Sugar",
+      "ratio": "1:1 by volume",
+      "note": "Toasted caramel flavor, slightly darker crumb"
+    },
+    {
+      "substitute": "Maple Syrup or Honey",
+      "ratio": "¾ cup per 1 cup sugar — reduce recipe liquid by 3 tbsp",
+      "note": "Moister bake and faster browning; lower oven by 25°F"
+    }
+  ],
+  "brown sugar": [
+    {
+      "substitute": "White Sugar + Molasses",
+      "ratio": "1 cup granulated sugar + 1 tbsp molasses (2 tbsp for dark)",
+      "note": "Literally how commercial brown sugar is made — 100% identical"
+    },
+    {
+      "substitute": "Coconut Sugar",
+      "ratio": "1:1 equal amount",
+      "note": "Natural caramel depth, slightly drier than packed brown sugar"
+    },
+    {
+      "substitute": "White Sugar + Maple Syrup",
+      "ratio": "1 cup white sugar + 1 tbsp pure maple syrup",
+      "note": "Gentle warmth when molasses isn't on hand"
+    }
+  ],
+  "powdered sugar": [
+    {
+      "substitute": "Blitzed Granulated Sugar + Cornstarch",
+      "ratio": "1 cup white sugar + 1 tbsp cornstarch blended 60s on high",
+      "note": "Fresh homemade confectioners sugar for glazes and dustings"
+    },
+    {
+      "substitute": "Blitzed Coconut Sugar + Arrowroot",
+      "ratio": "1 cup coconut sugar + 1 tbsp arrowroot blended fine",
+      "note": "Caramel-tinted frosting with deep flavor"
+    },
+    {
+      "substitute": "Powdered Erythritol / Monk Fruit",
+      "ratio": "1:1 equal volume",
+      "note": "Smooth sugar-free glaze option"
+    }
+  ],
+  "honey": [
+    {
+      "substitute": "Pure Maple Syrup",
+      "ratio": "1:1 equal amount",
+      "note": "Slightly thinner liquid, warm woodsy sweetness"
+    },
+    {
+      "substitute": "Agave Nectar",
+      "ratio": "1:1 equal amount",
+      "note": "Neutral liquid sweetener that dissolves instantly"
+    },
+    {
+      "substitute": "Brown Sugar + Warm Water",
+      "ratio": "1 cup packed brown sugar + ¼ cup water per 1 cup honey",
+      "note": "Matches sweetness and moisture in marinades and loaves"
+    }
+  ],
+  "maple syrup": [
+    {
+      "substitute": "Honey",
+      "ratio": "1:1 equal amount",
+      "note": "Slightly thicker floral sweetness"
+    },
+    {
+      "substitute": "Brown Sugar Simple Syrup",
+      "ratio": "1 cup brown sugar simmered with ½ cup water",
+      "note": "Rich caramel pourable glaze"
+    },
+    {
+      "substitute": "Agave Nectar",
+      "ratio": "1:1 equal amount",
+      "note": "Clean vegan liquid swap"
+    }
+  ],
+  "molasses": [
+    {
+      "substitute": "Dark Brown Sugar",
+      "ratio": "¾ cup dark brown sugar per ½ cup molasses",
+      "note": "Maintains deep caramel note in gingerbread and BBQ sauces"
+    },
+    {
+      "substitute": "Honey or Dark Maple Syrup",
+      "ratio": "1:1 equal amount",
+      "note": "Milder flavor than robust molasses"
+    },
+    {
+      "substitute": "Golden Syrup / Treacle",
+      "ratio": "1:1 equal amount",
+      "note": "Classic British baking swap with rich body"
+    }
+  ],
+  "corn syrup": [
+    {
+      "substitute": "Honey",
+      "ratio": "1:1 equal amount",
+      "note": "Prevents sugar crystallization with light floral flavor"
+    },
+    {
+      "substitute": "Golden Syrup",
+      "ratio": "1:1 equal amount",
+      "note": "Ideal for pecan pie and brittle"
+    },
+    {
+      "substitute": "Heavy Simple Syrup",
+      "ratio": "1 cup sugar dissolved in ¼ cup hot water",
+      "note": "Neutral flavor for candies and glazes"
+    }
+  ],
+  "vanilla extract": [
+    {
+      "substitute": "Vanilla Bean Paste",
+      "ratio": "1:1 equal amount",
+      "note": "Rich aroma plus visible vanilla bean specks"
+    },
+    {
+      "substitute": "Maple Syrup",
+      "ratio": "1:1 equal amount",
+      "note": "Subtle warm sweetness in cookies and pancake batters"
+    },
+    {
+      "substitute": "Almond Extract",
+      "ratio": "½ tsp almond extract per 1 tsp vanilla extract",
+      "note": "Fragrant bakery-style aroma — potent, so halve the dose"
+    },
+    {
+      "substitute": "Bourbon or Dark Rum",
+      "ratio": "1:1 equal amount",
+      "note": "Oak-aged vanillin notes fantastic in chocolate bakes"
+    }
+  ],
+  "cocoa powder": [
+    {
+      "substitute": "Melted Unsweetened Chocolate",
+      "ratio": "1 oz (28g) unsweetened chocolate per 3 tbsp cocoa (reduce butter 1 tbsp)",
+      "note": "Fudgier, denser chocolate intensity"
+    },
+    {
+      "substitute": "Dutch-Process ↔ Natural Cocoa",
+      "ratio": "1:1 equal weight",
+      "note": "Dutch is smoother/darker; natural is fruitier and slightly acidic"
+    },
+    {
+      "substitute": "Carob Powder",
+      "ratio": "1:1 equal amount",
+      "note": "Caffeine-free mild roasted sweetness"
+    }
+  ],
+  "chocolate chips": [
+    {
+      "substitute": "Chopped Dark Chocolate Bar",
+      "ratio": "1:1 equal weight (170g per cup)",
+      "note": "Melts into gourmet puddles rather than holding chip shape"
+    },
+    {
+      "substitute": "Cacao Nibs + Pinch Sugar",
+      "ratio": "¾ cup cacao nibs per 1 cup chips",
+      "note": "Crunchy, intensely dark espresso-like bite"
+    },
+    {
+      "substitute": "Toasted Pecans or Walnuts",
+      "ratio": "1:1 volume swap",
+      "note": "Buttery crunch when baking pantry-raid cookies"
+    }
+  ],
+  "vegetable oil": [
+    {
+      "substitute": "Melted Butter",
+      "ratio": "1:1 equal amount (cooled slightly)",
+      "note": "Richer flavor in cakes, waffles, and quick breads"
+    },
+    {
+      "substitute": "Avocado or Canola Oil",
+      "ratio": "1:1 equal amount",
+      "note": "Neutral flavor and high smoke point"
+    },
+    {
+      "substitute": "Light Olive Oil",
+      "ratio": "1:1 equal amount",
+      "note": "Works seamlessly in baking and pan-frying"
+    }
+  ],
+  "olive oil": [
+    {
+      "substitute": "Avocado Oil",
+      "ratio": "1:1 equal amount",
+      "note": "Similar healthy monounsaturated fat profile, higher smoke point"
+    },
+    {
+      "substitute": "Butter + Neutral Oil",
+      "ratio": "½ butter + ½ canola oil for sautéing",
+      "note": "Rich savoriness without burning"
+    },
+    {
+      "substitute": "Walnut Oil (Vinaigrettes)",
+      "ratio": "1:1 in cold dressings",
+      "note": "Nutty depth for salads and roasted vegetables"
+    }
+  ],
+  "coconut oil": [
+    {
+      "substitute": "Unsalted Butter",
+      "ratio": "1:1 equal amount",
+      "note": "Same solid-at-cool-room-temp behavior"
+    },
+    {
+      "substitute": "Olive or Avocado Oil",
+      "ratio": "1:1 for melted coconut oil recipes",
+      "note": "Keeps granola and quick breads crisp and moist"
+    },
+    {
+      "substitute": "Ghee",
+      "ratio": "1:1 equal amount",
+      "note": "High heat tolerance for curries and roasting"
+    }
+  ],
+  "lemon juice": [
+    {
+      "substitute": "Lime Juice",
+      "ratio": "1:1 equal amount",
+      "note": "Bright citrus acidity with subtle floral twist"
+    },
+    {
+      "substitute": "White Wine Vinegar",
+      "ratio": "½ tsp vinegar per 1 tsp lemon juice",
+      "note": "Clean brightness for dressings, pan sauces, and soups"
+    },
+    {
+      "substitute": "Apple Cider Vinegar",
+      "ratio": "½ to ¾ amount",
+      "note": "Fruity tang that activates baking soda reliably"
+    }
+  ],
+  "white wine": [
+    {
+      "substitute": "Chicken or Vegetable Broth + Lemon Juice",
+      "ratio": "1 cup broth + 1 tbsp lemon juice per 1 cup wine",
+      "note": "Alcohol-free deglazing with crisp acidity for risotto & sauces"
+    },
+    {
+      "substitute": "Dry Vermouth",
+      "ratio": "1:1 equal amount",
+      "note": "Keeps months in the fridge; classic chef substitute"
+    },
+    {
+      "substitute": "White Wine Vinegar + Water",
+      "ratio": "2 tbsp vinegar + ⅞ cup water per 1 cup wine",
+      "note": "Balanced tartness for pan reductions"
+    }
+  ],
+  "red wine": [
+    {
+      "substitute": "Beef or Mushroom Broth + Balsamic Vinegar",
+      "ratio": "1 cup broth + 1 tbsp balsamic vinegar per 1 cup wine",
+      "note": "Deep savory body and gentle acidity for braises"
+    },
+    {
+      "substitute": "Unsweetened Pomegranate or Cranberry Juice + Vinegar",
+      "ratio": "1 cup juice + 1 tsp red wine vinegar",
+      "note": "Tannic fruit depth similar to dry red wine"
+    },
+    {
+      "substitute": "Tomato Paste + Broth",
+      "ratio": "1 tbsp tomato paste whisked into 1 cup beef broth",
+      "note": "Rich color and umami in stews"
+    }
+  ],
+  "rice vinegar": [
+    {
+      "substitute": "Apple Cider Vinegar",
+      "ratio": "1:1 equal amount (+ pinch of sugar)",
+      "note": "Mild, fruity acidity ideal for slaws and stir-fries"
+    },
+    {
+      "substitute": "White Wine Vinegar",
+      "ratio": "1:1 equal amount",
+      "note": "Crisp, delicate tartness"
+    },
+    {
+      "substitute": "Lime Juice",
+      "ratio": "1:1 equal amount",
+      "note": "Fresh brightness in dipping sauces and marinades"
+    }
+  ],
+  "apple cider vinegar": [
+    {
+      "substitute": "White Wine Vinegar",
+      "ratio": "1:1 equal amount",
+      "note": "Closest acidity profile for dressings and baking"
+    },
+    {
+      "substitute": "Lemon Juice",
+      "ratio": "1:1 equal amount",
+      "note": "Fresh citrus lift"
+    },
+    {
+      "substitute": "Rice Vinegar",
+      "ratio": "1¼ tsp rice vinegar per 1 tsp ACV",
+      "note": "Slightly gentler acidity"
+    }
+  ],
+  "balsamic vinegar": [
+    {
+      "substitute": "Red Wine Vinegar + Honey or Brown Sugar",
+      "ratio": "1 tbsp red wine vinegar + ½ tsp honey",
+      "note": "Captures sweet-tart glaze balance"
+    },
+    {
+      "substitute": "Sherry Vinegar + Maple Syrup",
+      "ratio": "1 tbsp sherry vinegar + ½ tsp maple syrup",
+      "note": "Nutty, complex finish"
+    },
+    {
+      "substitute": "Worcestershire + Lemon Juice (Savory)",
+      "ratio": "½ tbsp each in marinades",
+      "note": "Deep savory caramel notes for meats and mushrooms"
+    }
+  ],
+  "soy sauce": [
+    {
+      "substitute": "Tamari",
+      "ratio": "1:1 equal amount",
+      "note": "Gluten-free, slightly richer umami depth"
+    },
+    {
+      "substitute": "Coconut Aminos",
+      "ratio": "1:1 equal amount + pinch of salt",
+      "note": "Soy-free, lower sodium with subtle sweetness"
+    },
+    {
+      "substitute": "Worcestershire Sauce + Water",
+      "ratio": "2 tbsp Worcestershire + 1 tbsp water",
+      "note": "Savory depth for marinades and beef dishes"
+    }
+  ],
+  "fish sauce": [
+    {
+      "substitute": "Soy Sauce + Lime Juice",
+      "ratio": "1:1 soy sauce + squeeze of lime",
+      "note": "Clean plant-friendly umami for curries and stir-fries"
+    },
+    {
+      "substitute": "Worcestershire Sauce",
+      "ratio": "1:1 equal amount",
+      "note": "Contains fermented anchovies — surprisingly close savory punch"
+    },
+    {
+      "substitute": "Miso Paste + Water",
+      "ratio": "1 tsp white miso dissolved in 2 tsp water",
+      "note": "Deep fermented savoriness without fish"
+    }
+  ],
+  "worcestershire sauce": [
+    {
+      "substitute": "Soy Sauce + Apple Cider Vinegar + Brown Sugar",
+      "ratio": "2 tsp soy + 1 tsp ACV + pinch sugar per tbsp",
+      "note": "Hits salt, tang, and sweetness together"
+    },
+    {
+      "substitute": "Balsamic Vinegar + Soy Sauce",
+      "ratio": "½ tbsp balsamic + ½ tbsp soy sauce",
+      "note": "Instant umami backbone for burgers and stews"
+    },
+    {
+      "substitute": "Oyster Sauce + Splash Vinegar",
+      "ratio": "1 tsp oyster sauce + ½ tsp vinegar + 1 tsp water",
+      "note": "Glossy savory depth"
+    }
+  ],
+  "tomato paste": [
+    {
+      "substitute": "Tomato Sauce / Passata (Reduced)",
+      "ratio": "3 tbsp tomato sauce per 1 tbsp paste — simmer down",
+      "note": "Evaporate extra water for concentrated flavor"
+    },
+    {
+      "substitute": "Crushed Canned Tomatoes (Strained)",
+      "ratio": "2–3 tbsp strained solids per 1 tbsp paste",
+      "note": "Bright tomato body in stews and curries"
+    },
+    {
+      "substitute": "Sun-Dried Tomatoes (Pureed)",
+      "ratio": "1 tbsp finely minced/pureed per 1 tbsp paste",
+      "note": "Intense sweet-savory umami"
+    }
+  ],
+  "chicken broth": [
+    {
+      "substitute": "Vegetable Broth",
+      "ratio": "1:1 equal amount",
+      "note": "Clean all-purpose vegetarian swap"
+    },
+    {
+      "substitute": "Water + Bouillon Paste + Butter",
+      "ratio": "1 cup hot water + 1 tsp bouillon (or ½ tbsp butter + pinch salt)",
+      "note": "Quick savory body when out of carton stock"
+    },
+    {
+      "substitute": "Dry White Wine + Water",
+      "ratio": "¼ cup white wine + ¾ cup water",
+      "note": "Aromatic pan sauce base"
+    }
+  ],
+  "beef broth": [
+    {
+      "substitute": "Mushroom Broth",
+      "ratio": "1:1 equal amount",
+      "note": "Deep earthy glutamates rival slow-simmered beef stock"
+    },
+    {
+      "substitute": "Chicken Broth + Soy Sauce",
+      "ratio": "1 cup chicken broth + 1 tsp soy sauce",
+      "note": "Adds darker color and roasted umami"
+    },
+    {
+      "substitute": "Water + Worcestershire + Tomato Paste",
+      "ratio": "1 cup water + 1 tsp Worcestershire + 1 tsp tomato paste",
+      "note": "Emergency pantry braising liquid"
+    }
+  ],
+  "breadcrumbs": [
+    {
+      "substitute": "Panko",
+      "ratio": "1:1 equal volume",
+      "note": "Lighter, shard-like extra crunch for coatings and toppings"
+    },
+    {
+      "substitute": "Crushed Crackers or Ritz",
+      "ratio": "1:1 equal volume (reduce added salt slightly)",
+      "note": "Buttery binder ideal for meatballs and casseroles"
+    },
+    {
+      "substitute": "Rolled Oats (Pulsed)",
+      "ratio": "1:1 pulsed briefly in blender",
+      "note": "Wholesome binder for meatloaf and veggie burgers"
+    }
+  ],
+  "garlic": [
+    {
+      "substitute": "Garlic Powder",
+      "ratio": "⅛ tsp garlic powder per 1 fresh clove",
+      "note": "Even savory distribution without risk of burning"
+    },
+    {
+      "substitute": "Minced Shallot",
+      "ratio": "1 tbsp minced shallot per 1 clove garlic",
+      "note": "Sweet, delicate allium aroma"
+    },
+    {
+      "substitute": "Garlic-Infused Olive Oil",
+      "ratio": "½ tbsp infused oil per clove (reduce cooking oil)",
+      "note": "Gentle FODMAP-friendly garlic fragrance"
+    }
+  ],
+  "ginger": [
+    {
+      "substitute": "Ground Ginger",
+      "ratio": "¼ tsp ground ginger per 1 tbsp fresh grated ginger",
+      "note": "Warm spice heat — best added early with aromatics"
+    },
+    {
+      "substitute": "Galangal or Lemongrass Paste",
+      "ratio": "1:1 in curries and soups",
+      "note": "Citrusy, piney Southeast Asian brightness"
+    },
+    {
+      "substitute": "Crystallized Ginger (Rinsed & Minced)",
+      "ratio": "1:1 in sweet bakes (reduce sugar slightly)",
+      "note": "Chewy spicy pockets in scones and cookies"
+    }
+  ],
+  "fresh herbs": [
+    {
+      "substitute": "Dried Herbs",
+      "ratio": "1 tsp dried herb per 1 tbsp chopped fresh herb (1:3)",
+      "note": "Add earlier in cooking so essential oils bloom"
+    },
+    {
+      "substitute": "Baby Spinach + Lemon Zest (Garnish)",
+      "ratio": "Finely chiffonaded with citrus zest",
+      "note": "Fresh color and brightness at plating"
+    },
+    {
+      "substitute": "Scallion Greens",
+      "ratio": "1:1 sliced thin for finishing",
+      "note": "Crisp herbal freshness"
+    }
+  ],
+  "mayonnaise": [
+    {
+      "substitute": "Full-Fat Greek Yogurt",
+      "ratio": "1:1 or 50/50 split",
+      "note": "Creamy tang with lighter feel in slaws and salads"
+    },
+    {
+      "substitute": "Sour Cream + Dijon Mustard",
+      "ratio": "1 cup sour cream + 1 tsp Dijon + pinch salt",
+      "note": "Rich sandwich spread and dip base"
+    },
+    {
+      "substitute": "Mashed Ripe Avocado + Lemon",
+      "ratio": "1:1 mashed smooth",
+      "note": "Buttery dairy- and egg-free spread"
+    }
+  ],
+  "tahini": [
+    {
+      "substitute": "Unsweetened Creamy Cashew or Almond Butter",
+      "ratio": "1:1 equal amount + tiny drop toasted sesame oil",
+      "note": "Silky emulsion for hummus and dressings"
+    },
+    {
+      "substitute": "Sunflower Seed Butter",
+      "ratio": "1:1 equal amount (nut-free)",
+      "note": "Earthy roasted seed flavor remarkably close to sesame"
+    },
+    {
+      "substitute": "Smooth Peanut Butter (Natural)",
+      "ratio": "¾ amount thinned with warm water",
+      "note": "Great in noodle sauces and dressings"
+    }
+  ],
+  "ricotta cheese": [
+    {
+      "substitute": "Cottage Cheese (Blended or Drained)",
+      "ratio": "1:1 equal amount",
+      "note": "Classic lasagne and pancake swap once pulsed smooth"
+    },
+    {
+      "substitute": "Crumbled Firm Tofu + Olive Oil + Lemon",
+      "ratio": "1 cup crumbled tofu + 1 tbsp olive oil + 1 tsp lemon + pinch salt",
+      "note": "Remarkable dairy-free stuffed-pasta filling"
+    },
+    {
+      "substitute": "Mascarpone (Thinned with Milk)",
+      "ratio": "¾ cup mascarpone + ¼ cup milk",
+      "note": "Ultra-creamy for sweet tarts and toast"
+    }
+  ],
+  "mascarpone": [
+    {
+      "substitute": "Cream Cheese + Heavy Cream",
+      "ratio": "¾ cup softened cream cheese whipped with ¼ cup heavy cream",
+      "note": "Spot-on richness for tiramisu and frostings"
+    },
+    {
+      "substitute": "Crème Fraîche + Cream Cheese",
+      "ratio": "½ cup each whipped smooth",
+      "note": "Velvety texture for savory risottos and desserts"
+    },
+    {
+      "substitute": "Blended Full-Fat Ricotta + Butter",
+      "ratio": "¾ cup ricotta + ¼ cup soft butter",
+      "note": "Lighter Italian dessert filling"
+    }
+  ],
+  "parmesan cheese": [
+    {
+      "substitute": "Pecorino Romano",
+      "ratio": "¾ cup Pecorino per 1 cup Parmesan",
+      "note": "Sharper, saltier sheep's-milk punch — go easy on added salt"
+    },
+    {
+      "substitute": "Grana Padano or Aged Asiago",
+      "ratio": "1:1 equal amount",
+      "note": "Nutty, crystalline Italian hard cheese"
+    },
+    {
+      "substitute": "Nutritional Yeast + Toasted Walnuts + Salt",
+      "ratio": "3 tbsp nutritional yeast + 1 tbsp finely blitzed walnuts + pinch salt",
+      "note": "Savory plant-based sprinkle for pasta and salads"
+    }
+  ]
+}

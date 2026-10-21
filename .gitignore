@@ -1,0 +1,14 @@
+# Environment variables & secrets (NEVER commit real API keys!)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Node / Build
+node_modules/
+dist/
+.vite/

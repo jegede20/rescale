@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg:              #FAFAF7;
+  --color-surface:         #FFFFFF;
+  --color-surface-raised:  #F5F4F0;
+  --color-border:          #E8E5DF;
+  --color-text-primary:    #1A1917;
+  --color-text-secondary:  #6B6760;
+  --color-text-muted:      #A09D99;
+  --color-accent:          #C4622D;
+  --color-accent-hover:    #A8501F;
+  --color-accent-soft:     #F5E6DE;
+  --color-warning:         #D97706;
+  --color-warning-soft:    #FEF3C7;
+  --color-success:         #4A7C59;
+  --color-success-soft:    #E8F3EC;
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-ui:      'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  --text-display:    72px;
+  --text-h1:         48px;
+  --text-h2:         36px;
+  --text-h3:         24px;
+  --text-h4:         18px;
+  --text-body-lg:    18px;
+  --text-body:       16px;
+  --text-body-sm:    14px;
+  --text-caption:    12px;
+  --text-mono:       15px;
+  --text-cook-step:  28px;
+  --text-cook-timer: 56px;
+
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px;  --space-5: 20px;  --space-6: 24px;
+  --space-8: 32px;  --space-10: 40px; --space-12: 48px;
+  --space-16: 64px; --space-24: 96px; --space-32: 128px;
+
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  --shadow-xs:     0 1px 2px rgba(26,25,23,0.06);
+  --shadow-sm:     0 2px 8px rgba(26,25,23,0.08);
+  --shadow-md:     0 4px 16px rgba(26,25,23,0.10);
+  --shadow-lg:     0 8px 32px rgba(26,25,23,0.12);
+  --shadow-xl:     0 16px 48px rgba(26,25,23,0.15);
+  --shadow-accent: 0 4px 20px rgba(196,98,45,0.25);
+
+  --hero-gradient: linear-gradient(135deg, #FAFAF7 0%, #F5F0E8 100%);
+}
+
+.dark {
+  --color-bg:              #141210;
+  --color-surface:         #1E1C1A;
+  --color-surface-raised:  #272422;
+  --color-border:          #2E2B28;
+  --color-text-primary:    #EDE9E4;
+  --color-text-secondary:  #9E9A95;
+  --color-text-muted:      #5C5955;
+  --color-accent:          #E07845;
+  --color-accent-hover:    #F08855;
+  --color-accent-soft:     #2D1F17;
+  --color-warning:         #F59E0B;
+  --color-warning-soft:    #1F1700;
+  --color-success:         #6AA67A;
+  --color-success-soft:    #0E1F14;
+
+  --shadow-xs:     0 1px 2px rgba(0,0,0,0.22);
+  --shadow-sm:     0 2px 8px rgba(0,0,0,0.28);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.34);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.40);
+  --shadow-xl:     0 16px 48px rgba(0,0,0,0.48);
+  --shadow-accent: 0 4px 20px rgba(224,120,69,0.28);
+
+  --hero-gradient: linear-gradient(135deg, #141210 0%, #1A1612 100%);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.hero-gradient {
+  background: var(--hero-gradient);
+}
+
+.hero-mockup-3d {
+  transform: perspective(1000px) rotateX(4deg) rotateY(-6deg);
+  transition: transform 350ms ease, box-shadow 350ms ease;
+}
+
+.hero-mockup-3d:hover {
+  transform: perspective(1000px) rotateX(1.5deg) rotateY(-2.5deg);
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.float-ingredient {
+  animation: floatSlow 6s ease-in-out infinite;
+  filter: saturate(0.8);
+}
+
+.float-ingredient-delayed {
+  animation: floatSlow 6s ease-in-out -3s infinite;
+  filter: saturate(0.8);
+}
+
+@keyframes timerPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.timer-running-pulse {
+  color: var(--color-accent);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+/* Reduced motion support: drop all transforms/bounces to calm fades */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, background-color, border-color, color !important;
+    scroll-behavior: auto !important;
+  }
+  .hero-mockup-3d,
+  .hero-mockup-3d:hover {
+    transform: none !important;
+  }
+  .float-ingredient,
+  .float-ingredient-delayed {
+    animation: none !important;
+  }
+}
+
+/* Clean Print Stylesheet */
+.print-only {
+  display: none;
+}
+
+@media print {
+  html, body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    padding: 24px !important;
+  }
+}

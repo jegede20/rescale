@@ -1,0 +1,12 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9
+ingredient-parser-nlp>=2.5.0
+recipe-scrapers>=15.0.0
+pytesseract>=0.3.13
+Pillow>=10.4.0
+groq>=0.13.0
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.2.0

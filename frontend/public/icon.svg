@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <mask id="rescale-dial">
+      <rect width="128" height="128" fill="white"/>
+      <circle cx="64" cy="86" r="15.5" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#FAFAF7"/>
+  <g mask="url(#rescale-dial)" fill="#1A1917">
+    <path d="M25 29C25 27.34 26.34 26 28 26H100C101.66 26 103 27.34 103 29C103 43.2 91.5 53 77.4 53H50.6C36.5 53 25 43.2 25 29Z"/>
+    <rect x="56.5" y="51" width="15" height="12"/>
+    <path d="M38 62.5C38.75 59.8 41.2 58 44 58H84C86.8 58 89.25 59.8 90 62.5L98.8 103.5C99.6 107.4 96.65 111 92.65 111H35.35C31.35 111 28.4 107.4 29.2 103.5L38 62.5Z"/>
+  </g>
+  <path d="M64 88L73.2 77.6" stroke="#C4622D" stroke-width="8.5" stroke-linecap="round"/>
+  <circle cx="64" cy="88" r="4.2" fill="#C4622D"/>
+</svg>
