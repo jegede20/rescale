@@ -456,9 +456,50 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
 
     extracted = ""
 
-    # Tier 1 (Primary — Free, zero billing card): Groq Multimodal Vision via GROQ_API_KEY
+    # Tier 1a: Google AI Studio Gemini Vision (free tier without billing card via GEMINI_API_KEY)
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if gemini_key:
+        try:
+            gemini_model = os.getenv("GEMINI_VISION_MODEL", "gemini-2.5-flash").strip()
+            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
+            async with httpx.AsyncClient(timeout=25.0) as client:
+                g_resp = await client.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent",
+                    params={"key": gemini_key},
+                    json={
+                        "contents": [
+                            {
+                                "parts": [
+                                    {
+                                        "text": (
+                                            "Extract all recipe text verbatim from this image (title, servings, "
+                                            "fractions/quantities, ingredients, temperatures, and steps). "
+                                            "Return plain text only."
+                                        )
+                                    },
+                                    {
+                                        "inline_data": {
+                                            "mime_type": "image/jpeg",
+                                            "data": b64_img,
+                                        }
+                                    },
+                                ]
+                            }
+                        ],
+                        "generationConfig": {"temperature": 0.0},
+                    },
+                )
+                g_resp.raise_for_status()
+                candidates = g_resp.json().get("candidates") or []
+                if candidates:
+                    parts = (candidates[0].get("content") or {}).get("parts") or []
+                    extracted = "".join(p.get("text", "") for p in parts).strip()
+        except Exception:
+            extracted = ""
+
+    # Tier 1b (Free, zero billing card): Groq Multimodal Vision via GROQ_API_KEY
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
-    if groq_key:
+    if not extracted and groq_key:
         try:
             vision_model = os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
             b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
