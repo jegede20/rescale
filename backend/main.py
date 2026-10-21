@@ -433,66 +433,53 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
     if not content:
         raise HTTPException(status_code=400, detail="Empty image upload.")
 
+    def _prepare_jpeg(img_bytes: bytes) -> bytes:
+        img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes))).convert("RGB")
+        img.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        return buf.getvalue()
+
     def _run_tesseract(img_bytes: bytes) -> str:
-        img = Image.open(io.BytesIO(img_bytes))
-        img = ImageOps.exif_transpose(img)
+        img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes)))
         gray = ImageOps.grayscale(img)
         enhanced = ImageEnhance.Contrast(gray).enhance(1.5)
         return pytesseract.image_to_string(enhanced).strip()
 
-    extracted = ""
     try:
-        extracted = await asyncio.to_thread(_run_tesseract, content)
+        jpeg_bytes = await asyncio.to_thread(_prepare_jpeg, content)
     except Exception:
-        extracted = ""
+        raise HTTPException(
+            status_code=422,
+            detail="Unsupported or corrupted image file.",
+        )
 
-    # Fallback: Google Cloud Vision API when configured
-    vision_key = os.getenv("GOOGLE_VISION_API_KEY", "").strip()
-    if not extracted and vision_key:
-        b64_img = base64.b64encode(content).decode("utf-8")
-        try:
-            async with httpx.AsyncClient(timeout=20.0) as client:
-                v_resp = await client.post(
-                    f"https://vision.googleapis.com/v1/images:annotate?key={vision_key}",
-                    json={
-                        "requests": [
-                            {
-                                "image": {"content": b64_img},
-                                "features": [{"type": "DOCUMENT_TEXT_DETECTION"}],
-                            }
-                        ]
-                    },
-                )
-                v_resp.raise_for_status()
-                annotations = (
-                    v_resp.json()
-                    .get("responses", [{}])[0]
-                    .get("fullTextAnnotation", {})
-                )
-                extracted = annotations.get("text", "").strip()
-        except Exception:
-            extracted = ""
+    extracted = ""
 
-    # Fallback 2: Groq Multimodal Vision (qwen/qwen3.8-27b) — free tier, handles handwriting with zero billing
+    # Tier 1 (Primary — Free, zero billing card): Groq Multimodal Vision via GROQ_API_KEY
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
-    if not extracted and groq_key:
+    if groq_key:
         try:
-            mime = file.content_type or "image/png"
-            b64_img = base64.b64encode(content).decode("utf-8")
+            vision_model = os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
+            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
             gclient = AsyncGroq(api_key=groq_key)
             v_comp = await gclient.chat.completions.create(
-                model="qwen/qwen3.8-27b",
+                model=vision_model,
                 messages=[
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Extract all recipe text verbatim from this image. Return plain text only.",
+                                "text": (
+                                    "Extract all recipe text verbatim from this image (title, servings, "
+                                    "fractions/quantities, ingredients, temperatures, and steps). "
+                                    "Return plain text only."
+                                ),
                             },
                             {
                                 "type": "image_url",
-                                "image_url": {"url": f"data:{mime};base64,{b64_img}"},
+                                "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
                             },
                         ],
                     }
@@ -500,6 +487,34 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                 temperature=0.0,
             )
             extracted = (v_comp.choices[0].message.content or "").strip()
+        except Exception:
+            extracted = ""
+
+    # Tier 2 (Optional free cloud OCR — zero billing card): OCR.space API (25,000 req/month free)
+    ocr_space_key = os.getenv("OCR_SPACE_API_KEY", "").strip()
+    if not extracted and ocr_space_key:
+        try:
+            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                o_resp = await client.post(
+                    "https://api.ocr.space/parse/image",
+                    data={
+                        "apikey": ocr_space_key,
+                        "base64Image": f"data:image/jpeg;base64,{b64_img}",
+                        "language": "eng",
+                        "OCREngine": "2",
+                    },
+                )
+                o_resp.raise_for_status()
+                results = o_resp.json().get("ParsedResults") or []
+                extracted = "\n".join(r.get("ParsedText", "") for r in results).strip()
+        except Exception:
+            extracted = ""
+
+    # Tier 3 (Offline container fallback — unlimited, zero external API needed): Local Tesseract 5
+    if not extracted:
+        try:
+            extracted = await asyncio.to_thread(_run_tesseract, content)
         except Exception:
             extracted = ""
 
