@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 import pytesseract
 from bs4 import BeautifulSoup
+from curl_cffi import requests as cffi_requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -330,101 +331,277 @@ async def parse_ingredients_endpoint(payload: ParseRequest) -> List[Dict[str, An
     return results
 
 
-@app.post("/scrape")
-async def scrape_recipe_endpoint(payload: ScrapeRequest) -> Dict[str, Any]:
-    url = (payload.url or "").strip()
-    if not url.startswith(("http://", "https://")):
-        raise HTTPException(status_code=400, detail="Invalid recipe URL.")
+VISION_RECIPE_PROMPT = """You are an expert culinary OCR and visual recipe assistant.
+Examine this image carefully and follow ONE of the two cases below:
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-        ),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
+CASE 1 — The image contains readable recipe text (cookbook page, recipe card, handwritten note, or screenshot):
+Transcribe the entire recipe verbatim (Title, Servings, Ingredients with exact fractions/units, and numbered Instructions).
 
-    try:
-        async with httpx.AsyncClient(
-            follow_redirects=True, timeout=15.0, headers=headers
-        ) as client:
-            resp = await client.get(url)
-            resp.raise_for_status()
-            html = resp.text
-    except Exception as exc:
-        raise HTTPException(
-            status_code=422, detail="Could not reach that URL."
-        ) from exc
+CASE 2 — The image is a photograph of a prepared dish / food with NO written recipe text:
+1. Inspect the food closely before naming it: check exact pasta/grain/bread shape (for example, distinguish baked elbow macaroni & cheese casserole from bread sliders/rolls, rice dishes, etc.), cheese sauce or crust, proteins, vegetables, spices, and baking dish or plate.
+2. Identify the dish accurately and write a complete, authentic, chef-tested home recipe for that exact dish.
 
-    try:
-        scraper = scrape_html(html, org_url=url, supported_only=False)
-        title = scraper.title() or "Imported Recipe"
-        servings = _extract_servings_number(scraper.yields(), default=4)
-        ingredients = scraper.ingredients() or []
-        instructions = scraper.instructions_list() or []
-        if not instructions:
-            raw_inst = scraper.instructions() or ""
-            instructions = [s.strip() for s in raw_inst.splitlines() if s.strip()]
-        try:
-            image = scraper.image()
-        except Exception:
-            image = None
+STRICT OUTPUT FORMAT (plain text ONLY — NO markdown bold **, NO backticks, NO commentary, NEVER say "No recipe text appears in this image"):
+<Dish Title>
+Serves <number>
 
-        if ingredients or instructions:
-            return {
-                "title": title,
-                "servings": servings,
-                "ingredients": ingredients,
-                "instructions": instructions,
-                "image": image,
-            }
-    except Exception:
-        pass
+Ingredients:
+<quantity> <unit> <ingredient, preparation>
+...
 
-    # Fallback direct Schema.org JSON-LD scan
+Instructions:
+1. <step with exact temperatures in °F and cooking times in minutes>
+2. <step>
+..."""
+
+SCRAPE_AI_SYSTEM_PROMPT = """Extract the recipe from the provided webpage content and return ONLY valid JSON with this exact schema:
+{
+  "title": "Exact Recipe Title",
+  "servings": 4,
+  "ingredients": ["1 cup all-purpose flour", "2 large eggs, room temperature"],
+  "instructions": ["Arrange a rack in the middle of the oven and heat to 350°F...", "Whisk flour..."]
+}
+Rules:
+- Extract the REAL ingredients (with exact quantities/units) and step-by-step instructions from the page.
+- Ignore ads, author bios, related recipes, comments, and video player controls.
+- If the page genuinely contains NO recipe at all, return {"title": "", "servings": 4, "ingredients": [], "instructions": []}."""
+
+
+def _normalize_scrape_url(raw: str) -> str:
+    cleaned = (raw or "").strip()
+    url_match = re.search(r"https?://[^\s<>\"']+", cleaned)
+    if url_match:
+        return url_match.group(0).rstrip(".,;)")
+    if cleaned and not cleaned.startswith(("http://", "https://")) and "." in cleaned:
+        return f"https://{cleaned}"
+    return cleaned
+
+
+def _extract_jsonld_recipe(html: str) -> Optional[Dict[str, Any]]:
     soup = BeautifulSoup(html, "lxml")
+
+    def _walk_nodes(obj: Any) -> List[Dict[str, Any]]:
+        found: List[Dict[str, Any]] = []
+        if isinstance(obj, dict):
+            found.append(obj)
+            if "@graph" in obj:
+                found.extend(_walk_nodes(obj["@graph"]))
+        elif isinstance(obj, list):
+            for el in obj:
+                found.extend(_walk_nodes(el))
+        return found
+
+    def _extract_steps(raw_steps: Any) -> List[str]:
+        out: List[str] = []
+        if isinstance(raw_steps, str):
+            out.extend(s.strip() for s in raw_steps.splitlines() if s.strip())
+        elif isinstance(raw_steps, list):
+            for st in raw_steps:
+                if isinstance(st, str) and st.strip():
+                    out.append(st.strip())
+                elif isinstance(st, dict):
+                    if st.get("text"):
+                        out.append(str(st["text"]).strip())
+                    elif "itemListElement" in st:
+                        out.extend(_extract_steps(st["itemListElement"]))
+        return out
+
     for tag in soup.find_all("script", type="application/ld+json"):
         try:
             data = json.loads(tag.string or "{}")
-            candidates = data if isinstance(data, list) else [data]
-            if isinstance(data, dict) and "@graph" in data:
-                candidates = data["@graph"]
-            for node in candidates:
-                if not isinstance(node, dict):
-                    continue
+            for node in _walk_nodes(data):
                 node_type = node.get("@type", "")
                 if "Recipe" in str(node_type):
-                    raw_steps = node.get("recipeInstructions", [])
-                    steps: List[str] = []
-                    if isinstance(raw_steps, str):
-                        steps = [s.strip() for s in raw_steps.splitlines() if s.strip()]
-                    elif isinstance(raw_steps, list):
-                        for st in raw_steps:
-                            if isinstance(st, str):
-                                steps.append(st.strip())
-                            elif isinstance(st, dict) and st.get("text"):
-                                steps.append(str(st["text"]).strip())
-                    return {
-                        "title": node.get("name", "Imported Recipe"),
-                        "servings": _extract_servings_number(
-                            node.get("recipeYield"), default=4
-                        ),
-                        "ingredients": node.get("recipeIngredient", []),
-                        "instructions": steps,
-                        "image": (
-                            node.get("image", [None])[0]
-                            if isinstance(node.get("image"), list)
-                            else node.get("image")
-                        ),
-                    }
+                    ingredients = [str(i).strip() for i in (node.get("recipeIngredient") or []) if str(i).strip()]
+                    steps = _extract_steps(node.get("recipeInstructions", []))
+                    if ingredients or steps:
+                        img_field = node.get("image")
+                        image_url = None
+                        if isinstance(img_field, str):
+                            image_url = img_field
+                        elif isinstance(img_field, list) and img_field:
+                            image_url = img_field[0].get("url") if isinstance(img_field[0], dict) else img_field[0]
+                        elif isinstance(img_field, dict):
+                            image_url = img_field.get("url")
+                        return {
+                            "title": str(node.get("name") or "Imported Recipe").strip(),
+                            "servings": _extract_servings_number(node.get("recipeYield"), default=4),
+                            "ingredients": ingredients,
+                            "instructions": steps,
+                            "image": image_url,
+                        }
         except Exception:
             continue
+    return None
+
+
+@app.post("/scrape")
+async def scrape_recipe_endpoint(payload: ScrapeRequest) -> Dict[str, Any]:
+    url = _normalize_scrape_url(payload.url)
+    if not url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="Invalid recipe URL.")
+
+    html = ""
+    http_status = 0
+
+    # Tier 1: Real Chrome TLS/HTTP2 impersonation via curl_cffi (bypasses standard Python TLS blocks)
+    def _fetch_chrome(target_url: str) -> tuple[int, str]:
+        resp = cffi_requests.get(
+            target_url,
+            impersonate="chrome",
+            timeout=15,
+            allow_redirects=True,
+        )
+        return resp.status_code, resp.text
+
+    try:
+        http_status, html = await asyncio.to_thread(_fetch_chrome, url)
+    except Exception:
+        http_status, html = 0, ""
+
+    if http_status == 200 and html:
+        try:
+            scraper = scrape_html(html, org_url=url, supported_only=False)
+            title = (scraper.title() or "Imported Recipe").strip()
+            servings = _extract_servings_number(scraper.yields(), default=4)
+            ingredients = [str(i).strip() for i in (scraper.ingredients() or []) if str(i).strip()]
+            instructions = [str(s).strip() for s in (scraper.instructions_list() or []) if str(s).strip()]
+            if not instructions:
+                raw_inst = scraper.instructions() or ""
+                instructions = [s.strip() for s in raw_inst.splitlines() if s.strip()]
+            try:
+                image = scraper.image()
+            except Exception:
+                image = None
+
+            if ingredients and instructions:
+                return {
+                    "title": title,
+                    "servings": servings,
+                    "ingredients": ingredients,
+                    "instructions": instructions,
+                    "image": image,
+                }
+        except Exception:
+            pass
+
+        ld_recipe = _extract_jsonld_recipe(html)
+        if ld_recipe:
+            return ld_recipe
+
+    # Tier 2: Cloudflare / Anti-Bot Reader (r.jina.ai) + LLM Structured Extraction
+    page_markdown = ""
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=22.0) as client:
+            jina_resp = await client.get(
+                f"https://r.jina.ai/{url}",
+                headers={"Accept": "text/plain"},
+            )
+            if jina_resp.status_code == 200 and len(jina_resp.text.strip()) > 120:
+                page_markdown = jina_resp.text.strip()
+    except Exception:
+        page_markdown = ""
+
+    # Fallback readable text from direct HTML if available
+    if not page_markdown and html and http_status == 200:
+        soup = BeautifulSoup(html, "lxml")
+        for tag in soup(["script", "style", "nav", "footer", "aside"]):
+            tag.decompose()
+        page_markdown = soup.get_text("\n", strip=True)
+
+    if page_markdown:
+        trimmed_content = page_markdown[:28000]
+
+        # Extract cleanly via Groq primary model
+        groq_key = os.getenv("GROQ_API_KEY", "").strip()
+        if groq_key:
+            client = AsyncGroq(api_key=groq_key)
+            primary_model = os.getenv("GROQ_TEXT_MODEL", "openai/gpt-oss-120b").strip()
+            for model_id in list(dict.fromkeys([primary_model, "openai/gpt-oss-20b"])):
+                try:
+                    comp = await client.chat.completions.create(
+                        model=model_id,
+                        messages=[
+                            {"role": "system", "content": SCRAPE_AI_SYSTEM_PROMPT},
+                            {"role": "user", "content": trimmed_content},
+                        ],
+                        temperature=0.0,
+                        response_format={"type": "json_object"},
+                    )
+                    raw_json = (comp.choices[0].message.content or "{}").strip()
+                    data = json.loads(raw_json)
+                    ings = [str(i).strip() for i in (data.get("ingredients") or []) if str(i).strip()]
+                    steps = [str(s).strip() for s in (data.get("instructions") or []) if str(s).strip()]
+                    if ings or steps:
+                        return {
+                            "title": str(data.get("title") or "Imported Recipe").strip(),
+                            "servings": _extract_servings_number(data.get("servings"), default=4),
+                            "ingredients": ings,
+                            "instructions": steps,
+                            "image": None,
+                        }
+                except Exception:
+                    continue
+
+        # Secondary AI fallback via Gemini free key
+        gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+        if gemini_key:
+            g_model = os.getenv("GEMINI_VISION_MODEL", "gemini-3.5-flash").strip()
+            try:
+                async with httpx.AsyncClient(timeout=22.0) as g_client:
+                    g_resp = await g_client.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent",
+                        params={"key": gemini_key},
+                        json={
+                            "contents": [
+                                {
+                                    "parts": [
+                                        {"text": f"{SCRAPE_AI_SYSTEM_PROMPT}\n\nWEBPAGE CONTENT:\n{trimmed_content}"}
+                                    ]
+                                }
+                            ],
+                            "generationConfig": {
+                                "temperature": 0.0,
+                                "responseMimeType": "application/json",
+                            },
+                        },
+                    )
+                    if g_resp.status_code == 200:
+                        parts = (g_resp.json().get("candidates") or [{}])[0].get("content", {}).get("parts") or []
+                        txt = "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
+                        data = json.loads(txt)
+                        ings = [str(i).strip() for i in (data.get("ingredients") or []) if str(i).strip()]
+                        steps = [str(s).strip() for s in (data.get("instructions") or []) if str(s).strip()]
+                        if ings or steps:
+                            return {
+                                "title": str(data.get("title") or "Imported Recipe").strip(),
+                                "servings": _extract_servings_number(data.get("servings"), default=4),
+                                "ingredients": ings,
+                                "instructions": steps,
+                                "image": None,
+                            }
+            except Exception:
+                pass
 
     raise HTTPException(
         status_code=422,
         detail="No structured recipe found at that URL.",
     )
+
+
+def _is_refusal_or_non_recipe(text: str) -> bool:
+    if not text or len(text.strip()) < 20:
+        return True
+    lowered = text.lower()
+    refusal_markers = (
+        "no recipe text",
+        "only shows a photograph",
+        "does not contain any text",
+        "no text visible",
+        "cannot find any recipe",
+        "there is no text",
+    )
+    return any(m in lowered for m in refusal_markers)
 
 
 @app.post("/ocr")
@@ -437,7 +614,7 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
         img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes))).convert("RGB")
         img.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=85)
+        img.save(buf, format="JPEG", quality=88)
         return buf.getvalue()
 
     def _run_tesseract(img_bytes: bytes) -> str:
@@ -456,13 +633,43 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
 
     extracted = ""
 
-    # Tier 1a: Google AI Studio Gemini Vision (free tier without billing card via GEMINI_API_KEY)
+    # Tier 1a (Blazing ~2.5s response): Groq LPU Multimodal Vision (qwen/qwen3.8-27b)
+    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    if groq_key:
+        try:
+            vision_model = os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
+            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
+            gclient = AsyncGroq(api_key=groq_key, timeout=14.0)
+            v_comp = await gclient.chat.completions.create(
+                model=vision_model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": VISION_RECIPE_PROMPT},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
+                            },
+                        ],
+                    }
+                ],
+                temperature=0.1,
+                max_tokens=2048,
+            )
+            candidate_text = (v_comp.choices[0].message.content or "").replace("**", "").strip()
+            if not _is_refusal_or_non_recipe(candidate_text):
+                extracted = candidate_text
+        except Exception:
+            extracted = ""
+
+    # Tier 1b: Google AI Studio Gemini Vision fallback (with capped thinkingBudget for fast turnaround)
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
-    if gemini_key:
+    if not extracted and gemini_key:
         primary_gemini = os.getenv("GEMINI_VISION_MODEL", "gemini-3.5-flash").strip()
         gemini_models = list(dict.fromkeys([primary_gemini, "gemini-3.5-flash", "gemini-3.8-flash"]))
         b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
-        async with httpx.AsyncClient(timeout=20.0) as client:
+        async with httpx.AsyncClient(timeout=18.0) as client:
             for g_model in gemini_models:
                 try:
                     g_resp = await client.post(
@@ -472,13 +679,7 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                             "contents": [
                                 {
                                     "parts": [
-                                        {
-                                            "text": (
-                                                "Extract all recipe text verbatim from this image (title, servings, "
-                                                "fractions/quantities, ingredients, temperatures, and steps). "
-                                                "Return plain text only."
-                                            )
-                                        },
+                                        {"text": VISION_RECIPE_PROMPT},
                                         {
                                             "inline_data": {
                                                 "mime_type": "image/jpeg",
@@ -488,7 +689,10 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                                     ]
                                 }
                             ],
-                            "generationConfig": {"temperature": 0.0},
+                            "generationConfig": {
+                                "temperature": 0.1,
+                                "thinkingConfig": {"thinkingBudget": 128},
+                            },
                         },
                     )
                     if g_resp.status_code != 200:
@@ -496,47 +700,14 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                     candidates = g_resp.json().get("candidates") or []
                     if candidates:
                         parts = (candidates[0].get("content") or {}).get("parts") or []
-                        extracted = "".join(
+                        candidate_text = "".join(
                             p.get("text", "") for p in parts if not p.get("thought")
-                        ).strip()
-                        if extracted:
+                        ).replace("**", "").strip()
+                        if not _is_refusal_or_non_recipe(candidate_text):
+                            extracted = candidate_text
                             break
                 except Exception:
                     continue
-
-    # Tier 1b (Free, zero billing card): Groq Multimodal Vision via GROQ_API_KEY
-    groq_key = os.getenv("GROQ_API_KEY", "").strip()
-    if not extracted and groq_key:
-        try:
-            vision_model = os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
-            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
-            gclient = AsyncGroq(api_key=groq_key)
-            v_comp = await gclient.chat.completions.create(
-                model=vision_model,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": (
-                                    "Extract all recipe text verbatim from this image (title, servings, "
-                                    "fractions/quantities, ingredients, temperatures, and steps). "
-                                    "Return plain text only."
-                                ),
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
-                            },
-                        ],
-                    }
-                ],
-                temperature=0.0,
-            )
-            extracted = (v_comp.choices[0].message.content or "").strip()
-        except Exception:
-            extracted = ""
 
     # Tier 2 (Optional free cloud OCR — zero billing card): OCR.space API (25,000 req/month free)
     ocr_space_key = os.getenv("OCR_SPACE_API_KEY", "").strip()

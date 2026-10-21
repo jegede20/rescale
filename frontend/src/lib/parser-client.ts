@@ -277,16 +277,20 @@ export function detectSectionsFromText(rawText: string): DetectedSections {
     }
 
     if (mode === 'ingredients') {
-      ingredientLines.push(line);
+      const cleanedIng = line.replace(/^\s*[-•*▪◦▢☐✓]+\s*/, '').replace(/\*\*/g, '').trim();
+      if (cleanedIng) ingredientLines.push(cleanedIng);
     } else if (mode === 'steps') {
-      const cleanedStep = line.replace(/^(?:step\s*\d+[:.)\-\s]+|\d+[.)\-\s]+)/i, '').trim();
+      const cleanedStep = line
+        .replace(/^(?:step\s*\d+[:.)\-\s]+|\d+[.)\-\s]+|[-•*]+\s+)/i, '')
+        .replace(/\*\*/g, '')
+        .trim();
       if (cleanedStep) stepLines.push(cleanedStep);
     } else {
       // Heuristic classification when headers are omitted
       if (/^(?:step\s*\d+|\d+[.)])\s+[A-Z]/i.test(line)) {
-        stepLines.push(line.replace(/^(?:step\s*\d+[:.)\-\s]+|\d+[.)\-\s]+)/i, '').trim());
+        stepLines.push(line.replace(/^(?:step\s*\d+[:.)\-\s]+|\d+[.)\-\s]+)/i, '').replace(/\*\*/g, '').trim());
       } else if (qtyStartRegex.test(line) && line.length < 95) {
-        ingredientLines.push(line);
+        ingredientLines.push(line.replace(/^\s*[-•*▪◦▢☐✓]+\s*/, '').replace(/\*\*/g, '').trim());
       } else if (line.length > 75 || /\b(preheat|bake|whisk|stir|cook|simmer|boil|heat|mix|combine|fold|pour|season|serve)\b/i.test(line)) {
         // Split multi-sentence paragraph if needed
         if (line.length > 140) {

@@ -132,7 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 w-full min-w-0 p-4 pb-24 md:p-6 md:pb-12">
+        <main className="flex-1 w-full min-w-0 p-4 pb-28 md:p-6 md:pb-12">
           <div className="mx-auto w-full max-w-[960px]">{children}</div>
         </main>
       </div>
@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Tab Bar */}
       <nav
         aria-label="Mobile navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 grid h-16 grid-cols-3 border-t border-border bg-surface md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 grid h-[calc(4rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] grid-cols-3 border-t border-border bg-surface md:hidden"
       >
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;

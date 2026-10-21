@@ -395,17 +395,16 @@ export function getNextCycledUnit(currentCanonical: CanonicalUnit, ingredientNam
   return formatUnitLabel(next, 2);
 }
 
-// Inline Temperature Conversion (°F <-> °C)
+// Inline Temperature Conversion (°F <-> °C, supporting °, º, ˚, bare F/C, and "degrees F/C")
 export function convertTemperaturesInText(text: string, targetUnit: TempUnit): string {
   if (!text) return '';
 
-  // Match e.g. 350°F, 350 °F, 350F, 350 degrees F, 180°C, 180 degrees C
   return text.replace(
-    /\b(\d{2,3})\s*(?:°\s*|degrees?\s+)([FCfc])\b|\b(\d{3})(°?[Ff])\b/g,
+    /\b(\d{2,3})\s*(?:[°º˚]\s*|degrees?\s+)([FCfc])\b|\b(\d{3})([FCfc])\b/g,
     (fullMatch, num1, unit1, num2, unit2) => {
       const val = Number(num1 ?? num2);
-      const rawU = String(unit1 ?? unit2).replace('°', '').toUpperCase();
-      if (!Number.isFinite(val)) return fullMatch;
+      const rawU = String(unit1 ?? unit2).replace(/[°º˚]/g, '').toUpperCase();
+      if (!Number.isFinite(val) || val < 50 || val > 550) return fullMatch;
 
       if (rawU === targetUnit) {
         return `${val}°${targetUnit}`;

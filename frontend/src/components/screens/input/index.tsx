@@ -73,7 +73,7 @@ const INPUT_METHODS: Array<{
     mode: 'ocr',
     emoji: '📸',
     title: 'Photo / OCR',
-    description: 'Snap or upload a cookbook page',
+    description: 'Snap a dish photo or recipe page',
     icon: Camera,
   },
   {
@@ -156,14 +156,14 @@ export function InputScreen() {
   const handleProcessImage = async (file: File) => {
     setLastFile(file);
     setErrorMsg(null);
-    setLoadingMsg('Scanning your image...');
+    setLoadingMsg('Analyzing image & preparing recipe...');
     try {
       const text = await extractOcrFromImage(file);
       setRawInputText(text);
       setLoadingMsg(null);
     } catch {
       setLoadingMsg(null);
-      setErrorMsg("Image wasn't clear enough. Try a well-lit photo or paste the text.");
+      setErrorMsg("Image wasn't clear enough. Try a clearer photo or paste the text.");
     }
   };
 
@@ -387,8 +387,12 @@ export function InputScreen() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Input
                 id="recipe-url-input"
-                type="url"
-                placeholder="https://example.com/classic-buttermilk-pancakes"
+                type="text"
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="https://www.thekitchn.com/french-apple-cake-22943649"
                 value={urlValue}
                 onChange={(e) => setUrlValue(e.target.value)}
                 onKeyDown={(e) => {
@@ -426,10 +430,10 @@ export function InputScreen() {
                 strokeWidth={1.5}
               />
               <p className="text-[15px] font-medium text-text-primary">
-                Snap a cookbook page or upload a screenshot
+                Snap a cooked dish, cookbook page, or screenshot
               </p>
               <p className="mt-1 text-[13px] text-text-secondary">
-                Supports JPG, PNG, or WEBP photos
+                Extracts printed/handwritten recipes OR generates the full recipe from any food photo
               </p>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
                 <input
@@ -439,6 +443,7 @@ export function InputScreen() {
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
+                    e.target.value = '';
                     if (f) void handleProcessImage(f);
                   }}
                 />
@@ -450,6 +455,7 @@ export function InputScreen() {
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
+                    e.target.value = '';
                     if (f) void handleProcessImage(f);
                   }}
                 />
@@ -474,7 +480,7 @@ export function InputScreen() {
             {rawInputText && (
               <div>
                 <p className="mb-2 text-[13px] font-medium text-text-secondary">
-                  Extracted OCR Text (edit if needed):
+                  Detected Recipe (edit before parsing if needed):
                 </p>
                 <AutoGrowTextarea
                   value={rawInputText}
