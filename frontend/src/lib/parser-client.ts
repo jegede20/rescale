@@ -337,8 +337,8 @@ export async function parseRecipeFull(rawText: string): Promise<{
 }> {
   const sections = detectSectionsFromText(rawText);
 
-  // If format is very messy (no ingredients or no steps found), invoke /ai-parse directly
-  if (sections.ingredientLines.length === 0 || (sections.autoDetectConfidence === 'low' && sections.stepLines.length === 0)) {
+  // If format is messy, dish-only, or missing steps/ingredients (e.g. voice phrase "noodles and egg"), invoke /ai-parse
+  if (sections.ingredientLines.length === 0 || sections.stepLines.length === 0) {
     try {
       const aiRes = await fetch(`${API_BASE}/ai-parse`, {
         method: 'POST',
@@ -509,9 +509,12 @@ export async function scrapeRecipeUrl(url: string): Promise<{
   return res.json();
 }
 
-export async function extractOcrFromImage(file: File): Promise<string> {
+export async function extractOcrFromImages(files: File[]): Promise<string> {
+  const limited = files.slice(0, 5);
   const formData = new FormData();
-  formData.append('file', file);
+  for (const f of limited) {
+    formData.append('files', f);
+  }
   const res = await fetch(`${API_BASE}/ocr`, {
     method: 'POST',
     body: formData,
@@ -523,9 +526,16 @@ export async function extractOcrFromImage(file: File): Promise<string> {
   return data.text || '';
 }
 
-export async function transcribeVoiceBlob(blob: Blob): Promise<string> {
+export async function extractOcrFromImage(file: File): Promise<string> {
+  return extractOcrFromImages([file]);
+}
+
+export async function transcribeVoiceBlob(
+  blob: Blob,
+  filename = 'recording.webm'
+): Promise<string> {
   const formData = new FormData();
-  formData.append('file', blob, 'recording.webm');
+  formData.append('file', blob, filename);
   const res = await fetch(`${API_BASE}/voice`, {
     method: 'POST',
     body: formData,

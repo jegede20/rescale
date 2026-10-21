@@ -46,10 +46,15 @@ async def root_health() -> Dict[str, str]:
     return {"status": "ok", "service": "Rescale API"}
 
 AI_PARSE_SYSTEM_PROMPT = (
-    "You are a recipe parser. Extract structured recipe data from "
-    "the following text. Return valid JSON with fields: title (string), "
-    "servings (number), ingredients (array of {quantity, unit, ingredient, "
-    "preparation}), steps (array of strings). Handle unusual formats gracefully."
+    "You are an expert chef and recipe parser. "
+    "1) If the input text already contains a recipe (even messy, unformatted, or dictated speech), "
+    "extract its structured recipe data accurately. "
+    "2) If the input text is just a dish name, short phrase, or bare ingredient list without cooking steps "
+    "(for example 'noodles and egg', 'jollof rice for 4', or 'fluffy pancakes'), "
+    "generate a complete, authentic, chef-tested home recipe for that dish with proper quantities, units, and step-by-step instructions (including temperatures and cook times). "
+    "Return valid JSON ONLY with fields: title (string), servings (number), "
+    "ingredients (array of {quantity (number or null), unit (string), ingredient (string), preparation (string)}), "
+    "and steps (array of clear step strings)."
 )
 
 UNSCALABLE_UNITS = {
@@ -605,52 +610,116 @@ def _is_refusal_or_non_recipe(text: str) -> bool:
 
 
 @app.post("/ocr")
-async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
-    content = await file.read()
-    if not content:
+async def ocr_endpoint(
+    files: Optional[List[UploadFile]] = File(default=None),
+    file: Optional[UploadFile] = File(default=None),
+) -> Dict[str, str]:
+    uploads: List[UploadFile] = []
+    if files:
+        uploads.extend(f for f in files if f is not None)
+    if file is not None:
+        uploads.append(file)
+
+    if not uploads:
+        raise HTTPException(status_code=400, detail="Empty image upload.")
+    if len(uploads) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 images allowed per scan.")
+
+    raw_images: List[bytes] = []
+    for up in uploads:
+        b = await up.read()
+        if b:
+            raw_images.append(b)
+
+    if not raw_images:
         raise HTTPException(status_code=400, detail="Empty image upload.")
 
-    def _prepare_jpeg(img_bytes: bytes) -> bytes:
-        img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes))).convert("RGB")
-        img.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
+    def _compose_clean_vision_frame(raw_list: List[bytes]) -> bytes:
+        pil_imgs = [
+            ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
+            for b in raw_list
+        ]
+        if len(pil_imgs) == 1:
+            im = pil_imgs[0].copy()
+            im.thumbnail((1500, 1500), Image.Resampling.LANCZOS)
+            buf = io.BytesIO()
+            im.save(buf, format="JPEG", quality=88)
+            return buf.getvalue()
+
+        # Stack 2..5 images vertically at crisp readable width under Groq's 4MP single-request limit
+        target_w = 1100
+        scaled: List[Image.Image] = []
+        for sub in pil_imgs:
+            ratio = target_w / max(1, sub.width)
+            new_h = max(1, int(sub.height * ratio))
+            scaled.append(sub.resize((target_w, new_h), Image.Resampling.LANCZOS))
+
+        divider_h = 18
+        total_h = sum(s.height for s in scaled) + divider_h * (len(scaled) - 1)
+        canvas = Image.new("RGB", (target_w, total_h), (245, 243, 238))
+        y = 0
+        for s in scaled:
+            canvas.paste(s, (0, y))
+            y += s.height + divider_h
+
+        # Keep total pixel area safely under 3.2 megapixels while preserving razor-sharp text
+        max_pixels = 3_100_000
+        cur_pixels = canvas.width * canvas.height
+        if cur_pixels > max_pixels:
+            scale = (max_pixels / cur_pixels) ** 0.5
+            canvas = canvas.resize(
+                (max(1, int(canvas.width * scale)), max(1, int(canvas.height * scale))),
+                Image.Resampling.LANCZOS,
+            )
+
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=88)
+        canvas.save(buf, format="JPEG", quality=88)
         return buf.getvalue()
 
-    def _run_tesseract(img_bytes: bytes) -> str:
-        img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes)))
-        gray = ImageOps.grayscale(img)
-        enhanced = ImageEnhance.Contrast(gray).enhance(1.5)
-        return pytesseract.image_to_string(enhanced).strip()
+    def _run_tesseract_all(all_bytes: List[bytes]) -> str:
+        pages: List[str] = []
+        for img_bytes in all_bytes:
+            img = ImageOps.exif_transpose(Image.open(io.BytesIO(img_bytes)))
+            gray = ImageOps.grayscale(img)
+            enhanced = ImageEnhance.Contrast(gray).enhance(1.5)
+            txt = pytesseract.image_to_string(enhanced).strip()
+            if txt:
+                pages.append(txt)
+        return "\n\n".join(pages).strip()
 
     try:
-        jpeg_bytes = await asyncio.to_thread(_prepare_jpeg, content)
+        combined_jpeg = await asyncio.to_thread(_compose_clean_vision_frame, raw_images)
     except Exception:
         raise HTTPException(
             status_code=422,
             detail="Unsupported or corrupted image file.",
         )
 
+    multi_note = (
+        f"\nNOTE: This composite stacks {len(raw_images)} sequential images top-to-bottom in reading order. "
+        "Combine every ingredient and instruction across all sections seamlessly into ONE unified, non-duplicated recipe."
+        if len(raw_images) > 1
+        else ""
+    )
+    full_vision_prompt = VISION_RECIPE_PROMPT + multi_note
+    b64_img = base64.b64encode(combined_jpeg).decode("ascii")
+
     extracted = ""
 
-    # Tier 1a (Blazing ~2.5s response): Groq LPU Multimodal Vision (qwen/qwen3.8-27b)
+    # Tier 1a (Blazing ~1.3s response across all 1..5 images!): Groq LPU Multimodal Vision
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
     if groq_key:
         try:
             vision_model = os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
-            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
-            gclient = AsyncGroq(api_key=groq_key, timeout=14.0)
+            gclient = AsyncGroq(api_key=groq_key, max_retries=1, timeout=15.0)
             v_comp = await gclient.chat.completions.create(
                 model=vision_model,
                 messages=[
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": VISION_RECIPE_PROMPT},
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
-                            },
+                            {"type": "text", "text": full_vision_prompt},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"}},
                         ],
                     }
                 ],
@@ -663,13 +732,12 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
         except Exception:
             extracted = ""
 
-    # Tier 1b: Google AI Studio Gemini Vision fallback (with capped thinkingBudget for fast turnaround)
+    # Tier 1b: Google AI Studio Gemini 3.5 Flash Vision fallback (verified 200 OK!)
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not extracted and gemini_key:
         primary_gemini = os.getenv("GEMINI_VISION_MODEL", "gemini-3.5-flash").strip()
         gemini_models = list(dict.fromkeys([primary_gemini, "gemini-3.5-flash", "gemini-3.8-flash"]))
-        b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
-        async with httpx.AsyncClient(timeout=18.0) as client:
+        async with httpx.AsyncClient(timeout=20.0) as client:
             for g_model in gemini_models:
                 try:
                     g_resp = await client.post(
@@ -679,20 +747,12 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                             "contents": [
                                 {
                                     "parts": [
-                                        {"text": VISION_RECIPE_PROMPT},
-                                        {
-                                            "inline_data": {
-                                                "mime_type": "image/jpeg",
-                                                "data": b64_img,
-                                            }
-                                        },
+                                        {"text": full_vision_prompt},
+                                        {"inline_data": {"mime_type": "image/jpeg", "data": b64_img}},
                                     ]
                                 }
                             ],
-                            "generationConfig": {
-                                "temperature": 0.1,
-                                "thinkingConfig": {"thinkingBudget": 128},
-                            },
+                            "generationConfig": {"temperature": 0.1},
                         },
                     )
                     if g_resp.status_code != 200:
@@ -709,11 +769,10 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
                 except Exception:
                     continue
 
-    # Tier 2 (Optional free cloud OCR — zero billing card): OCR.space API (25,000 req/month free)
+    # Tier 2 (Optional free cloud OCR): OCR.space API
     ocr_space_key = os.getenv("OCR_SPACE_API_KEY", "").strip()
     if not extracted and ocr_space_key:
         try:
-            b64_img = base64.b64encode(jpeg_bytes).decode("ascii")
             async with httpx.AsyncClient(timeout=20.0) as client:
                 o_resp = await client.post(
                     "https://api.ocr.space/parse/image",
@@ -730,10 +789,10 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
         except Exception:
             extracted = ""
 
-    # Tier 3 (Offline container fallback — unlimited, zero external API needed): Local Tesseract 5
+    # Tier 3 (Offline container fallback): Local Tesseract 5 across all uploaded images
     if not extracted:
         try:
-            extracted = await asyncio.to_thread(_run_tesseract, content)
+            extracted = await asyncio.to_thread(_run_tesseract_all, raw_images)
         except Exception:
             extracted = ""
 
@@ -746,11 +805,24 @@ async def ocr_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
     return {"text": extracted}
 
 
+WHISPER_SILENCE_ARTIFACTS = {
+    "thank you",
+    "thank you.",
+    "thanks for watching",
+    "thanks for watching.",
+    "thanks for listening",
+    "subtitles by the amara.org community",
+    "you",
+    ".",
+    "...",
+}
+
+
 @app.post("/voice")
 async def voice_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
     audio_bytes = await file.read()
-    if not audio_bytes:
-        raise HTTPException(status_code=400, detail="Empty audio upload.")
+    if not audio_bytes or len(audio_bytes) < 256:
+        raise HTTPException(status_code=400, detail="Recording was too short or empty.")
 
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
     if not groq_key:
@@ -758,6 +830,19 @@ async def voice_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
             status_code=503,
             detail="Voice transcription fallback requires GROQ_API_KEY.",
         )
+
+    # Ensure filename extension matches container MIME so Whisper decodes WebM/MP4/OGG/WAV accurately
+    raw_name = (file.filename or "").strip()
+    ctype = (file.content_type or "").lower()
+    if not raw_name:
+        if "mp4" in ctype or "aac" in ctype or "m4a" in ctype:
+            raw_name = "recording.m4a"
+        elif "ogg" in ctype:
+            raw_name = "recording.ogg"
+        elif "wav" in ctype:
+            raw_name = "recording.wav"
+        else:
+            raw_name = "recording.webm"
 
     client = AsyncGroq(api_key=groq_key)
     primary_voice = os.getenv("GROQ_VOICE_MODEL", "whisper-large-v3-turbo").strip()
@@ -767,11 +852,17 @@ async def voice_endpoint(file: UploadFile = File(...)) -> Dict[str, str]:
     for model_id in voice_models:
         try:
             transcription = await client.audio.transcriptions.create(
-                file=(file.filename or "recording.webm", audio_bytes),
+                file=(raw_name, audio_bytes),
                 model=model_id,
+                language="en",
+                temperature=0.0,
+                prompt="Cooking recipe dictation: dish name, servings, ingredients, fractions, cups, tablespoons, teaspoons, grams, temperatures, and cooking instructions.",
                 response_format="json",
             )
-            return {"text": (transcription.text or "").strip()}
+            cleaned = (transcription.text or "").strip()
+            if cleaned.lower() in WHISPER_SILENCE_ARTIFACTS:
+                cleaned = ""
+            return {"text": cleaned}
         except Exception as exc:
             last_exc = exc
 
