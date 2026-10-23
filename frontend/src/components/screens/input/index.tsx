@@ -330,17 +330,24 @@ export function InputScreen() {
       if (!AudioContextCtor) return;
       const ctx = new AudioContextCtor();
       audioCtxRef.current = ctx;
+      if (ctx.state === 'suspended') {
+        void ctx.resume();
+      }
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.65;
       source.connect(analyser);
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
       const updateMeter = () => {
         analyser.getByteFrequencyData(dataArray);
+        const now = performance.now() / 160;
         const bars = Array.from({ length: 10 }, (_, idx) => {
           const val = dataArray[idx + 1] ?? 0;
-          return Math.min(100, Math.max(18, Math.round((val / 255) * 95 + 16)));
+          const idleWave = 24 + Math.sin(now + idx * 0.7) * 9;
+          const voiceBoost = (val / 255) * 92;
+          return Math.min(100, Math.max(18, Math.round(Math.max(idleWave, voiceBoost + 18))));
         });
         setAudioLevels(bars);
         animFrameRef.current = requestAnimationFrame(updateMeter);
@@ -537,7 +544,7 @@ export function InputScreen() {
       </div>
 
       {/* 2x2 Input Method Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         {INPUT_METHODS.map((method) => {
           const Icon = method.icon;
           const active = inputMode === method.mode;
@@ -550,7 +557,7 @@ export function InputScreen() {
                 setInputMode(method.mode);
               }}
               className={cn(
-                'group text-left rounded-lg border p-5 transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md cursor-pointer',
+                'group text-left rounded-lg border p-3.5 sm:p-5 transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md cursor-pointer',
                 active
                   ? 'border-accent bg-accent-soft/45 shadow-sm'
                   : 'border-border bg-surface hover:border-accent/50'
@@ -558,18 +565,18 @@ export function InputScreen() {
             >
               <div
                 className={cn(
-                  'mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors',
+                  'mb-2.5 sm:mb-3 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md transition-colors',
                   active
                     ? 'bg-accent text-white'
                     : 'bg-surface-raised text-accent group-hover:bg-accent-soft'
                 )}
               >
-                <Icon className="h-5 w-5" strokeWidth={1.5} />
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.5} />
               </div>
-              <div className="font-sans text-[16px] font-semibold text-text-primary">
+              <div className="font-sans text-[14px] sm:text-[16px] font-semibold text-text-primary leading-snug">
                 {method.title}
               </div>
-              <p className="mt-0.5 text-[14px] text-text-secondary">
+              <p className="mt-0.5 text-[12px] sm:text-[14px] text-text-secondary leading-snug">
                 {method.description}
               </p>
             </button>
@@ -814,11 +821,11 @@ export function InputScreen() {
               </p>
 
               {isRecording && (
-                <div className="mt-4 flex items-end justify-center gap-1.5 h-10">
+                <div className="mt-4 flex items-end justify-center gap-1.5 h-[40px]">
                   {audioLevels.map((level, idx) => (
                     <span
                       key={idx}
-                      style={{ height: `${level}%` }}
+                      style={{ height: `${Math.round((level / 100) * 38)}px` }}
                       className="w-1.5 rounded-full bg-accent transition-[height] duration-75 ease-out inline-block"
                     />
                   ))}

@@ -9,7 +9,7 @@ export function ToastViewport({ toasts }: ToastViewportProps) {
   return (
     <div
       aria-live="polite"
-      className="no-print pointer-events-none fixed bottom-6 left-1/2 z-[80] flex -translate-x-1/2 flex-col items-center gap-2.5 px-4 w-full max-w-md"
+      className="no-print pointer-events-none fixed bottom-20 md:bottom-6 left-1/2 z-[80] flex -translate-x-1/2 flex-col items-center gap-2.5 px-4 w-full max-w-md"
     >
       <AnimatePresence mode="popLayout">
         {toasts.slice(0, 2).map((toast) => (
